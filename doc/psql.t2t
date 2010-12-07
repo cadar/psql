@@ -1,0 +1,91 @@
+psql
+Martin Carlson <martin@erlang-solutions.com>
+%%mtime(%m/%d/%Y)
+
+== NAME ==
+psql - Erlang PostgreSQL interface v3
+
+== SYNOPSIS ==
+```
+	connect(IP, Port) -> {ok, Socket}
+
+	close(Socket) -> ok
+
+	authenticate(Socket, Username, Database) -> ok | {AuthType, Cont}
+
+	authenticate_md5(Socket, Username, Pasword) -> ok
+
+	q(Socket, Query) -> SQLResult
+
+	q(Socket, Query, Parameters) -> SQLResult
+
+	parse(Socket, Query) -> ok
+
+	parse(Socket, Name, Query, Types) -> ok
+
+	bind(Socket, Parameters) -> ok
+
+	bind(Socket, Statement, Portal, Parameters) -> ok
+
+	describe(Socket) -> ok
+
+	describe(Socket, Type, Name) -> ok
+
+	execute(Socket) -> ok
+
+	execute(Socket, Name, ResultsetSize) -> ok
+
+	sync(Socket) -> ok
+
+	retreive_result(Socket) -> SQLResult
+
+	retreive_result_raw(Socket) -> {Meta, ResultSet}
+
+	convert_parameters(Parameters) -> iolist
+```
+
+== DESCRIPTION ==
+The PostgreSQL Erlang interface is an Erlang/OTP application
+for interfacing PostgreSQL databases. The interface is connection
+oriented and uses one connection per client.
+
+=== SAMPLE ===
+Here is a simple example of a select statement.
+It uses the default query function q/2.
+
+```
+{ok, C} = psql:connect("127.0.0.1", 5432).
+ok = psql:authenticate(C, "jondoe", "testdb").
+{select, [{1,1}], idle} = psql:q(C, "SELECT * FROM test").
+```
+
+== NOTES ==
+The optional **Parameters** of ``q/2`` and ``convert_parameters/1`` 
+has the form ``[{sql_int, 1}]`` where //sql_int// is the tag used 
+for parameter conversion to the postgres text format.
+See [psql_typer] for more information on type conversion.
+
+The **authenticate** functions return //ok// on successfull authentication.
+If additional information is requested the //AuthType// will indicate
+what information is expected and //Cont// will be the required server based
+input.
+
+== RETURN VALUES ==
+The interface returns the values above or {error, Reason} where Reason
+may be a standard OTP error description or an SQL Error Report (represented as a proplist).
+
+=== SQLResult ===
+
+| select   | ``{select, ResultSet, State}`` |
+| insert   | ``{insert, OID, Rows, State}`` |
+| update   | ``{update, Rows, State}``      |
+| delete   | ``{delete, Rows, State}``      |
+| begin    | ``{begin, State}``             |
+| rollback | ``{rollback, State}``          |
+| commit   | ``{commit, State}``            |
+
+For further information see the postgres documentation.
+
+== SEE ALSO ==
+[psql_typer], [psql_protocol], [psql_parser], [psql_socket]
+
