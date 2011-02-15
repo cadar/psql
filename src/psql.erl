@@ -87,8 +87,8 @@ bind(Con, Parameters) ->
 	bind(Con, "", "", Parameters).
 bind(Con, Statement, Portal, Parameters) ->
 	psql_socket:send(Con, psql_proto:bind(
-		Statement,
 		Portal,
+		Statement,
 		Parameters
 	)).
 
